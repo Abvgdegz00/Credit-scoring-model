@@ -5,15 +5,8 @@
 ## 1. О проекте
 
 **Задача:** бинарная классификация (просрочка / не просрочка)  
-**Модель:** `GradientBoostingClassifier`  
+**Модели:** `GradientBoostingClassifier`, `RandomForestClassifier`, `XGBoostClassifier`
 
-### Метрики модели
-| Метрика | Значение |
-|----------|-----------|
-| ROC-AUC  | 0.7781 |
-| F1-Score | 0.4674 |
-| Precision | 0.6602 |
-| Recall | 0.3617 |
 
 ## 2. Архитектура проекта
 
@@ -39,7 +32,7 @@ credit-scoring-model/
 - **Версионирование данных:** DVC  
 - **Трекинг экспериментов:** MLflow  
 - **Валидация данных:** Great Expectations  
-- **ML-пайплайн:** Scikit-learn  
+- **ML-пайплайн:** Scikit-learn / XGBoost
 - **API:** FastAPI  
 - **Контейнеризация:** Docker  
 - **CI/CD:** GitHub Actions  
@@ -50,7 +43,7 @@ credit-scoring-model/
 ### 4.1. Клонирование и установка
 
 ```bash
-git clone https://github.com/Abvgdegz00/credit-scoring-model.git
+git clone https://github.com/Abvgdegz00/Project-credit-scoring-model
 cd credit-scoring-model
 pip install -r requirements.txt
 ```
