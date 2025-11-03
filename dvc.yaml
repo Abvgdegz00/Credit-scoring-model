@@ -1,0 +1,21 @@
+stages:
+  prepare:
+    cmd: python src/data/make_dataset.py data/raw/UCI_Credit_Card.csv data/processed/
+    deps:
+      - src/data/make_dataset.py
+      - data/raw/UCI_Credit_Card.csv
+    outs:
+      - data/processed
+
+  train:
+    cmd: python -m src.models.train
+    deps:
+      - src/models/train.py
+      - src/models/pipeline.py
+      - src/features/build_features.py
+      - data/processed
+    outs:
+      - models
+    metrics:
+      - metrics_summary.json:
+          cache: false

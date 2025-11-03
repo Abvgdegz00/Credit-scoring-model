@@ -1,0 +1,19 @@
+# Игнорируем данные и модели
+data/processed/
+models/
+mlruns/
+
+# Игнорируем временные файлы Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.vscode/
+.idea/
+.ipynb_checkpoints/
+
+# DVC служебные файлы
+!.dvc
+/models
+/metrics.json
