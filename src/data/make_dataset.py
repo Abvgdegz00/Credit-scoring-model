@@ -3,24 +3,26 @@ import sys
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from src.features.build_features import build_features
 
-
-# Загружаем данные, убираем пробелы в названиях колонок и делим на train/test.
-def prepare_dataset(input_path: str, output_dir: str):
+def prepare_dataset(input_path: str, output_dir: str, test_size: float = 0.2):
     df = pd.read_csv(input_path)
+
+    # Убираем пробелы в названиях колонок
     df.columns = [col.strip() for col in df.columns]
 
-    df = build_features(df)
+    # Переименовываем таргет
+    df = df.rename(columns={"default.payment.next.month": "def_pay"})
 
+    # Разделяем X / y
     y = df["def_pay"]
-    X = df.drop("def_pay", axis=1)
+    X = df.drop(columns=["def_pay"])
 
+    # Train / test split
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+        X, y, test_size=test_size, random_state=42, stratify=y
     )
 
+    # Сохраняем
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -31,6 +33,4 @@ def prepare_dataset(input_path: str, output_dir: str):
 
 
 if __name__ == "__main__":
-    import sys
-
     prepare_dataset(sys.argv[1], sys.argv[2])

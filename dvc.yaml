@@ -8,14 +8,13 @@ stages:
       - data/processed
 
   train:
-    cmd: python -m src.models.train
+    cmd: python -m src.create_models.train
     deps:
-      - src/models/train.py
-      - src/models/pipeline.py
-      - src/features/build_features.py
+      - src/create_models/train.py
+      - src/create_models/pipeline.py
       - data/processed
     outs:
-      - models
+      - models/credit_default_model.pkl
     metrics:
       - metrics_summary.json:
           cache: false

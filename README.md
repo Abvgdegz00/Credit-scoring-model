@@ -1,10 +1,11 @@
 # Credit Default Prediction
 
-Полнофункциональный ML-пайплайн для предсказания просрочки клиентов кредитных карт.  
+Полнофункциональный ML-пайплайн для предсказания дефолта клиентов кредитных карт.  
 
 ## 1. О проекте
 
-**Задача:** бинарная классификация (просрочка / не просрочка)  
+**Задача:** бинарная классификация (дефолт / не дефолт) 
+**Датасет:** [Default of Credit Card Clients Dataset](https://www.kaggle.com/datasets/uciml/default-of-credit-card-clients-dataset)
 **Модели:** `GradientBoostingClassifier`, `RandomForestClassifier`, `XGBoostClassifier`
 
 
@@ -18,8 +19,7 @@ credit-scoring-model/
 ├── models/                     # Обученные модели (DVC)
 ├── src/
 │   ├── data/                   # Подготовка и валидация данных
-│   ├── features/               # Feature Engineering
-│   ├── models/                 # Обучение и предсказание
+│   ├── create_models/          # Обучение и предсказание
 │   └── api/                    # FastAPI приложение
 ├── tests/                      # Unit-тесты
 ├── notebooks/                  # EDA
@@ -113,9 +113,9 @@ curl -X POST "http://localhost:8000/predict"   -H "Content-Type: application/jso
 |--------|-------------|
 | `src/data/make_dataset.py` | Подготовка и разделение данных |
 | `src/data/validation.py` | Валидация данных |
-| `src/features/build_features.py` | Инженерия признаков |
-| `src/models/pipeline.py` | Создание ML пайплайна |
-| `src/models/train.py` | Обучение модели и логирование в MLflow |
+| `src/create_models/pipeline.py` | Создание ML пайплайна |
+| `src/create_models/train.py` | Обучение модели и логирование в MLflow |
+| `src/create_models/predict.py` | Инференс |
 | `src/api/app.py` | FastAPI приложение |
 
 ### 5.2. DVC-пайплайн
@@ -174,5 +174,38 @@ GitHub Actions автоматически:
 
 - Запускает тесты  
 - Проверяет качество кода (`black`, `flake8`)  
-- Валидирует данные  
-- Собирает Docker-образ
+- Валидирует данные
+
+## 10. Docker
+
+Проект поставляется с Dockerfile для локального запуска FastAPI приложения
+
+### Сборка Docker образа
+```bash
+docker build -t credit-scoring-api .
+```
+
+### Запуск контейнера
+```bash
+docker run -p 8000:8000 credit-scoring-api
+```
+
+### Описание образа:
+
+- **Базовый образ:** python:3.9-slim
+
+- Устанавливаются зависимости из requirements.txt
+
+- Копируются исходный код и обученная модель credit_default_model.pkl
+
+- Порт FastAPI: 8000
+
+**Команда запуска:**
+```bash
+uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+```
+
+#№№ Проверка доступности API
+```bash
+curl http://localhost:8000/health
+```

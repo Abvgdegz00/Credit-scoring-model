@@ -9,41 +9,36 @@ stages:
       size: 2862995
     - path: src/data/make_dataset.py
       hash: md5
-      md5: f4d82300ec4196df903bf807d5c0799c
-      size: 1162
+      md5: ea2ca0a25ee50f6bec6dac66d48be096
+      size: 1178
     outs:
     - path: data/processed
       hash: md5
-      md5: 3bcc06bb4c905d3d18ecc5fc47586db1.dir
-      size: 3538491
+      md5: 5479edfcc889090639e83446b03089a4.dir
+      size: 3707391
       nfiles: 4
   train:
-    cmd: python -m src.models.train
+    cmd: python -m src.create_models.train
     deps:
     - path: data/processed
       hash: md5
-      md5: 3bcc06bb4c905d3d18ecc5fc47586db1.dir
-      size: 3538491
+      md5: 5479edfcc889090639e83446b03089a4.dir
+      size: 3707391
       nfiles: 4
-    - path: src/features/build_features.py
+    - path: src/create_models/pipeline.py
       hash: md5
-      md5: e09d83dd43023808f910173475072455
-      size: 487
-    - path: src/models/pipeline.py
+      md5: d5ea5ebf1aaf6ed73b8be5c017232a9a
+      size: 1260
+    - path: src/create_models/train.py
       hash: md5
-      md5: e90be56bb8c5ec091897f5bd97937edd
-      size: 1534
-    - path: src/models/train.py
-      hash: md5
-      md5: f61cd2817c6e4bf177034584f95d6d26
-      size: 5391
+      md5: ea55dd820ebb09d6098f323a45e13e18
+      size: 5496
     outs:
     - path: metrics_summary.json
       hash: md5
-      md5: aeb1587f8a00ef6c26d6d60ff9595289
-      size: 1208
-    - path: models
+      md5: 8cc015de212d390f6130eaa9de8c183f
+      size: 488
+    - path: models/credit_default_model.pkl
       hash: md5
-      md5: 0eb8904e8bd4aa053ba30a1981d45178.dir
-      size: 33821850
-      nfiles: 6
+      md5: 6a3fe1c1391462006d3372f1f44fb60a
+      size: 1099731

@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN mkdir -p /app/models
 COPY models/credit_default_model.pkl /app/models/credit_default_model.pkl
 
 RUN ls -la /app/models/ && \

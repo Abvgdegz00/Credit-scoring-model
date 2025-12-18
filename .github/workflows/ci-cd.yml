@@ -37,7 +37,8 @@ jobs:
           flake8 src tests --max-line-length=110 --extend-ignore=E203,W503,E402,F401
 
       - name: Run tests
-        run: pytest tests/ -v --tb=short
+        run: |
+          pytest tests/ -v --tb=short
         
       - name: Setup Great Expectations
         run: |
@@ -87,8 +88,9 @@ jobs:
         run: |
           python -c "
           import runpy
-          module = runpy.run_path('src/models/pipeline.py')
-          pipeline = module['create_pipeline']()
+          from sklearn.ensemble import GradientBoostingClassifier
+          module = runpy.run_path('src/create_models/pipeline.py')
+          pipeline = module['create_pipeline'](GradientBoostingClassifier())
           print('Pipeline created successfully')
           print(f'Pipeline steps: {pipeline.named_steps}')
           "
