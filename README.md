@@ -205,7 +205,7 @@ docker run -p 8000:8000 credit-scoring-api
 uvicorn src.api.app:app --host 0.0.0.0 --port 8000
 ```
 
-#№№ Проверка доступности API
+### Проверка доступности API
 ```bash
 curl http://localhost:8000/health
 ```
