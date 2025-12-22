@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drift-monitor
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drift-monitor
+  template:
+    metadata:
+      labels:
+        app: drift-monitor
+    spec:
+      containers:
+        - name: drift-monitor
+          image: your-registry/credit-scoring-drift:latest
+          envFrom:
+            - configMapRef:
+                name: drift-monitor-config
+          volumeMounts:
+            - name: reports
+              mountPath: /app/reports
+      volumes:
+        - name: reports
+          emptyDir: {}

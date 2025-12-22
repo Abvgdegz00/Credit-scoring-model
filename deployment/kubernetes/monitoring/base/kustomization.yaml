@@ -1,0 +1,13 @@
+namespace: monitoring
+resources:
+  - namespace.yaml
+  - prometheus-serviceaccount.yaml
+  - prometheus-clusterrole.yaml
+  - prometheus-clusterrolebinding.yaml
+  - prometheus-deployment.yaml
+  - prometheus-config.yaml
+  - grafana-deployment.yaml
+  - grafana-service.yaml
+  - loki-deployment.yaml
+  - promtail-daemonset.yaml
+  - prometheus-alerts.yaml

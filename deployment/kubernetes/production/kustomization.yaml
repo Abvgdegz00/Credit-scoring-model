@@ -1,0 +1,15 @@
+namespace: production
+resources:
+  - ../base/deployment.yaml
+  - ../base/service.yaml
+  - ../base/ingress.yaml
+  - ../base/configmap.yaml
+
+images:
+  - name: your-registry/credit-scoring-api
+    newTag: "prod-latest"
+
+configMapGenerator:
+  - name: credit-scoring-config
+    literals:
+      - ENV=production

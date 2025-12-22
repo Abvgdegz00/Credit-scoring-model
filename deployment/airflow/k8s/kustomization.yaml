@@ -1,0 +1,5 @@
+namespace: monitoring
+resources:
+  - airflow-deployment.yaml
+  - airflow-service.yaml
+  - airflow-configmap.yaml

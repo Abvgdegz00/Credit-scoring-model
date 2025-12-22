@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow
+  template:
+    metadata:
+      labels:
+        app: airflow
+    spec:
+      containers:
+        - name: airflow
+          image: your-registry/credit-scoring-airflow:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: dags
+              mountPath: /app/dags
+      volumes:
+        - name: dags
+          emptyDir: {}

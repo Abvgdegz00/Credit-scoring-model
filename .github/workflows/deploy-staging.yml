@@ -1,0 +1,28 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: '1.27.0'
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -f deployment/docker/Dockerfile.api -t your-registry/credit-scoring-api:staging .
+          docker push your-registry/credit-scoring-api:staging
+
+      - name: Deploy with Kustomize
+        run: |
+          kubectl apply -k deployment/kubernetes/staging

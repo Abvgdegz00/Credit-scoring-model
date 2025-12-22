@@ -1,0 +1,9 @@
+variable "yc_token" { type = string }
+variable "cloud_id" { type = string }
+variable "folder_id" { type = string }
+variable "zone" { type = string }
+variable "cluster_sa_id" { type = string }
+variable "node_sa_id" { type = string }
+variable "kms_key_id" { type = string }
+variable "service_account_id" { type = string }
+variable "notification_channel_id" { type = string }

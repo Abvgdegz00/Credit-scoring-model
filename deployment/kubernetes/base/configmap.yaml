@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: credit-scoring-config
+data:
+  MODEL_PATH: "/app/models/credit_default_model.pkl"
+  ENV: "production"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: credit-scoring-secrets
+type: Opaque
+stringData:
+  YC_TOKEN: "<your-token>"

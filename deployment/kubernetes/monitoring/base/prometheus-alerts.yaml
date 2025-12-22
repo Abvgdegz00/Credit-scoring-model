@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alerts
+  namespace: monitoring
+data:
+  alerts.yml: |
+    groups:
+      - name: credit-scoring-alerts
+        rules:
+          - alert: HighCPU
+            expr: sum(rate(container_cpu_usage_seconds_total{namespace="default"}[5m])) > 0.8
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU usage detected"
+              description: "CPU usage > 80% for 2 minutes"
+
+          - alert: HighMemory
+            expr: |
+              sum(container_memory_usage_bytes{namespace="default"})
+              /
+              sum(container_spec_memory_limit_bytes{namespace="default"})
+              > 0.8
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High Memory usage detected"
+              description: "Memory usage > 80% for 2 minutes"

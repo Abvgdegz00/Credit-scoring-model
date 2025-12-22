@@ -13,17 +13,28 @@
 
 ```
 credit-scoring-model/
+├── .github/workflows/        # CI/CD пайплайны
 ├── data/
-│   ├── raw/                    # Исходные данные (DVC)
-│   └── processed/              # Обработанные данные (DVC)
-├── models/                     # Обученные модели (DVC)
+│   ├── raw/                  # Исходные данные
+│   └── processed/            # Обработанные данные
+├── deployment/
+│   ├── airflow/              # DAGs и K8s конфиги для Airflow
+│   ├── docker/               # Dockerfile и requirements для API, Drift, Trainer
+│   └── kubernetes/           # K8s манифесты, AB-тестирование, monitoring, drift
+├── docs/runbooks/            # Runbook документация
+├── infrastructure/
+│   ├── environments/         # Terraform конфигурации (staging, production)
+│   ├── modules/              # Terraform модули (network, kubernetes, storage, monitoring)
+│   └── scripts/              # Скрипты инициализации Terraform
+├── models/                   # Обученные и конвертированные модели
+├── notebooks/                # EDA
+├── scripts/                  # Скрипты для обучения, конвертации, квантизации, бенчмарков
 ├── src/
-│   ├── data/                   # Подготовка и валидация данных
-│   ├── create_models/          # Обучение и предсказание
-│   └── api/                    # FastAPI приложение
-├── tests/                      # Unit-тесты
-├── notebooks/                  # EDA
-├── .github/workflows/          # CI/CD пайплайны
+│   ├── api/                  # FastAPI приложение
+│   ├── create_models/        # Обучение, инференс, пайплайн, нейронная сеть
+│   ├── data/                 # Подготовка и валидация данных
+│   └── monitoring/           # Drift мониторинг
+├── tests/                    # Unit-тесты
 └── configuration files
 ```
 
@@ -32,11 +43,16 @@ credit-scoring-model/
 - **Версионирование данных:** DVC  
 - **Трекинг экспериментов:** MLflow  
 - **Валидация данных:** Great Expectations  
-- **ML-пайплайн:** Scikit-learn / XGBoost
+- **ML-пайплайн:** Scikit-learn / XGBoost  
+- **Конвертация моделей:** ONNX + квантизация  
 - **API:** FastAPI  
-- **Контейнеризация:** Docker  
-- **CI/CD:** GitHub Actions  
+- **Контейнеризация:** Docker, multi-stage build  
+- **Kubernetes:** Deployment, Service, liveness/readiness probes, NodeGroups  
+- **CI/CD:** GitHub Actions (build, test, staging/production deploy, rollback)  
 - **Тестирование:** pytest  
+- **Мониторинг:** Prometheus, Grafana, Loki, Promtail  
+- **Drift-мониторинг:** Evidently  
+- **Автоматизация переобучения:** Airflow  
 
 ## 4. Руководство по установке и запуску
 
@@ -61,14 +77,30 @@ dvc metrics show
 dvc dag
 ```
 
-### 4.3. Запуск API
+### 4.3. Запуск  
 
+Проект содержит три Dockerfile для разных целей:
+
+- **dockerfile.api:** приложение для предсказаний дефолта
+- **dockerfile.drift:**	Контейнер для мониторинга drift модели с использованием Evidently
+- **dockerfile.trainer:**	Контейнер для обучения моделей и конвертации/квантизации
+
+#### 4.3.1. Сборка и запуск API
 ```bash
-# Сборка Docker образа
-docker build -t credit-scoring-api .
-
-# Запуск контейнера
+docker build -f deployment/docker/dockerfile.api -t credit-scoring-api .
 docker run -p 8000:8000 credit-scoring-api
+```
+
+#### 4.3.2. Cборка и запуск Drift Monitoring
+```bash
+docker build -f deployment/docker/dockerfile.drift -t credit-drift-monitor .
+docker run credit-drift-monitor
+```
+
+#### 4.3.3. Cборка и запуск Trainer
+```bash
+docker build -f deployment/docker/dockerfile.trainer -t credit-trainer .
+docker run credit-trainer
 ```
 
 ### 4.4. Тестирование API
@@ -107,105 +139,53 @@ curl -X POST "http://localhost:8000/predict"   -H "Content-Type: application/jso
 
 ## 5. Структура кода
 
-### 5.1. Основные модули
-
-| Модуль | Назначение |
-|--------|-------------|
-| `src/data/make_dataset.py` | Подготовка и разделение данных |
-| `src/data/validation.py` | Валидация данных |
-| `src/create_models/pipeline.py` | Создание ML пайплайна |
-| `src/create_models/train.py` | Обучение модели и логирование в MLflow |
-| `src/create_models/predict.py` | Инференс |
-| `src/api/app.py` | FastAPI приложение |
-
-### 5.2. DVC-пайплайн
+### 5.1. DVC-пайплайн
 ```yaml
 stages:
   prepare:     # Подготовка данных
   train:       # Обучение модели
+  convert:     # Конвертация и квантизация
+  validate:    # Проверка совпадения результатов
 ```
 
-## 6. Разработка
+## 6. Инфраструктура
 
-### 6.1. Запуск тестов
-```bash
-pytest tests/ -v
-```
+- **Terraform модули:** network, kubernetes, storage, monitoring
 
-### 6.2. Линтинг кода
-```bash
-black src tests
-flake8 src tests
-```
+- **Kubernetes:** Deployment, Service, liveness/readiness probes, NodeGroups
 
-### 6.3. Переобучение модели
-```bash
-dvc repro train
-```
+- **Мониторинг:** Prometheus + Grafana + Loki + алерты
 
-### 6.4. Мониторинг экспериментов
-```bash
-mlflow ui
-# Открыть http://localhost:5000
-```
+- **Drift-мониторинг:** Evidently, деплоймент + ConfigMap
 
-## 7. API Документация
+## 7. CI/CD
 
-После запуска API доступно:
+GitHub Actions автоматизирует:
 
-- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)  
-- **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Линтинг (black, flake8)**
 
-### Эндпоинты
-| Метод | Путь | Назначение |
-|--------|------|-------------|
-| `GET` | `/` | Статус API |
-| `GET` | `/health` | Проверка здоровья |
-| `POST` | `/predict` | Предсказание дефолта |
+- **Тестирование (pytest)**
 
-## 8. Воспроизведение пайплайна
-```bash
-dvc repro
-```
+- **Валидирует данные**
 
-## 9. CI/CD
+- **Build и push Docker образов**
 
-GitHub Actions автоматически:
+- **Развертывание на staging / production**
 
-- Запускает тесты  
-- Проверяет качество кода (`black`, `flake8`)  
-- Валидирует данные
+- **Canary release и rollback**
 
-## 10. Docker
+## 8. Автоматическое переобучение
 
-Проект поставляется с Dockerfile для локального запуска FastAPI приложения
+- **Airflow DAG для переобучения модели на новых данных**
 
-### Сборка Docker образа
-```bash
-docker build -t credit-scoring-api .
-```
+- **Docker образ для Airflow**
 
-### Запуск контейнера
-```bash
-docker run -p 8000:8000 credit-scoring-api
-```
+- **Автоматическое масштабирование через K8s NodeGroups**
 
-### Описание образа:
+## 9. Мониторинг и алерты
 
-- **Базовый образ:** python:3.9-slim
+- **CPU/Memory алерты через Terraform**
 
-- Устанавливаются зависимости из requirements.txt
+- **Centralized logging через Loki + Promtail**
 
-- Копируются исходный код и обученная модель credit_default_model.pkl
-
-- Порт FastAPI: 8000
-
-**Команда запуска:**
-```bash
-uvicorn src.api.app:app --host 0.0.0.0 --port 8000
-```
-
-### Проверка доступности API
-```bash
-curl http://localhost:8000/health
-```
+- **Drift мониторинг с Evidently**

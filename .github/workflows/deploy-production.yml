@@ -1,0 +1,27 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: '1.27.0'
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -f deployment/docker/Dockerfile.api -t your-registry/credit-scoring-api:prod-latest .
+          docker push your-registry/credit-scoring-api:prod-latest
+
+      - name: Deploy with Kustomize
+        run: |
+          kubectl apply -k deployment/kubernetes/production

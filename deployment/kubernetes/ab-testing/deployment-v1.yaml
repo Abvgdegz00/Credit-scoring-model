@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credit-scoring-api-v1
+  labels:
+    app: credit-scoring
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: credit-scoring
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: credit-scoring
+        version: v1
+    spec:
+      containers:
+        - name: api
+          image: your-registry/credit-scoring-api:v1
+          ports:
+            - containerPort: 8000

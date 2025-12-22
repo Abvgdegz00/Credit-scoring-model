@@ -3,6 +3,9 @@ import mlflow.sklearn
 import pandas as pd
 import joblib
 import json
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import (

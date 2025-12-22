@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drift-monitor-config
+  namespace: monitoring
+data:
+  REFERENCE_DATA_PATH: "/app/data/reference_data.csv"
+  CURRENT_DATA_PATH: "/app/data/current_data.csv"
+  MODEL_PATH: "/app/models/credit_default_model.pkl"
+  REPORT_PATH: "/app/reports/drift_report.html"
